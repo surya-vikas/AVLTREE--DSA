@@ -17,6 +17,7 @@
             background: #2c3e50;
             min-height: 100vh;
             padding: 20px;
+            overflow-x: hidden;
         }
 
         .container {
@@ -446,8 +447,16 @@
                 return;
             }
 
+            tree.isDuplicate = false;
             tree.root = tree.insert(tree.root, value);
-            addOperation(`Inserted node: ${value}`);
+            
+            if (tree.isDuplicate) {
+                alert('Duplicates not allowed! Node ' + value + ' already exists in the tree.');
+                addOperation(`❌ Attempted to insert duplicate: ${value}`);
+            } else {
+                addOperation(`✅ Inserted node: ${value}`);
+            }
+            
             input.value = '';
             drawTree();
         }
