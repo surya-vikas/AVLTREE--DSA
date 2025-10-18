@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AVL Tree Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scrollbar-width: none;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #2c3e50;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+        input[type="number"] {
+            padding: 12px 20px;
+            font-size: 16px;
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            width: 200px;
+            transition: all 0.3s;
+        }
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #2980b9;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+        }
+
+        .btn-insert {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        }
+
+        .btn-insert:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-clear {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn-clear:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        .visualization {
+            padding: 40px;
+            min-height: 500px;
+            overflow: auto;
+        }
+
+        #treeCanvas {
+            display: block;
+            margin: 0 auto;
+        }
+
+        .info-panel {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-top: 2px solid #e9ecef;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .info-item {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .info-label {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .operations-section {
+            padding: 20px 30px;
+            background: white;
+            border-top: 2px solid #e9ecef;
+        }
+
+        .operations-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .operations-list {
+            max-height: 200px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .operation-item {
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            background: white;
+            border-left: 4px solid #3498db;
+            border-radius: 5px;
+            font-size: 0.95em;
+            color: #2c3e50;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .operation-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .operations-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .operations-list::-webkit-scrollbar-track {
+            background: #e9ecef;
+            border-radius: 10px;
+        }
+
+        .operations-list::-webkit-scrollbar-thumb {
+            background: #3498db;
+            border-radius: 10px;
+        }
+
+        .node {
+            fill: #3498db;
+            stroke: #2980b9;
+            stroke-width: 3;
+        }
+
+        .node-text {
+            fill: white;
+            font-size: 16px;
+            font-weight: bold;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        .edge {
+            stroke: #a8b3cf;
+            stroke-width: 2;
+        }
+
+        .balance-factor {
+            fill: #f5576c;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>AVL Tree Visualizer</h1>
+            <p>Self-Balancing Binary Search Tree</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <input type="number" id="nodeValue" placeholder="Enter a number" />
+                <button class="btn-insert" onclick="insertNode()">Insert Node</button>
+                <button class="btn-insert" onclick="clearTree()">Clear Tree</button>
+            </div>
+        </div>
+
+        <div class="visualization">
+            <canvas id="treeCanvas" width="1200" height="600"></canvas>
+        </div>
+
+        <div class="info-panel">
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Total Nodes</div>
+                    <div class="info-value" id="nodeCount">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Tree Height</div>
+                    <div class="info-value" id="treeHeight">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="operations-section">
+            <div class="operations-title">Operations Performed</div>
+            <div class="operations-list" id="operationsList">
+                <div style="text-align: center; color: #6c757d; padding: 20px;">No operations yet</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AVLNode {
+            constructor(data) {
+                this.data = data;
+                this.h = 1;
+                this.left = null;
+                this.right = null;
+            }
+        }
+
+        class AVLTree {
+            constructor() {
+                this.root = null;
+                this.isDuplicate = false;
+            }
+
+            insert(root, x) {
+                if (root === null) return new AVLNode(x);
+
+                if (x < root.data) {
+                    root.left = this.insert(root.left, x);
+                } else if (x > root.data) {
+                    root.right = this.insert(root.right, x);
+                } else {
+                    this.isDuplicate = true;
+                    return root;
+                }
+
+                this.updateHeight(root);
+
+                const bf = this.getBF(root);
+
+                if (bf === -2) {
+                    if (this.getBF(root.right) === -1) {
+                        root = this.leftRotate(root);
+                    } else {
+                        root.right = this.rightRotate(root.right);
+                        root = this.leftRotate(root);
+                    }
+                } else if (bf === 2) {
+                    if (this.getBF(root.left) === 1) {
+                        root = this.rightRotate(root);
+                    } else {
+                        root.left = this.leftRotate(root.left);
+                        root = this.rightRotate(root);
+                    }
+                }
+
+                return root;
+            }
+
+            leftRotate(root) {
+                const newRoot = root.right;
+                root.right = newRoot.left;
+                this.updateHeight(root);
+                newRoot.left = root;
+                this.updateHeight(newRoot);
+                return newRoot;
+            }
+
+            rightRotate(root) {
+                const newRoot = root.left;
+                root.left = newRoot.right;
+                this.updateHeight(root);
+                newRoot.right = root;
+                this.updateHeight(newRoot);
+                return newRoot;
+            }
+
+            updateHeight(root) {
+                if (root === null) return;
+                const leftHeight = root.left ? root.left.h : 0;
+                const rightHeight = root.right ? root.right.h : 0;
+                root.h = 1 + Math.max(leftHeight, rightHeight);
+            }
+
+            getBF(root) {
+                if (root === null) return 0;
+                const leftHeight = root.left ? root.left.h : 0;
+                const rightHeight = root.right ? root.right.h : 0;
+                return leftHeight - rightHeight;
+            }
+
+            countNodes(root) {
+                if (root === null) return 0;
+                return 1 + this.countNodes(root.left) + this.countNodes(root.right);
+            }
+
+            getHeight(root) {
+                return root ? root.h : 0;
+            }
+        }
+
+        const tree = new AVLTree();
+        const canvas = document.getElementById('treeCanvas');
+        const ctx = canvas.getContext('2d');
+        const operations = [];
+
+        function addOperation(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            operations.unshift(`[${timestamp}] ${message}`);
+            updateOperationsList();
+        }
+
+        function updateOperationsList() {
+            const list = document.getElementById('operationsList');
+            if (operations.length === 0) {
+                list.innerHTML = '<div style="text-align: center; color: #6c757d; padding: 20px;">No operations yet</div>';
+            } else {
+                list.innerHTML = operations.map(op => `<div class="operation-item">${op}</div>`).join('');
+            }
+        }
+
+        function drawTree() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (tree.root) {
+                drawNode(tree.root, canvas.width / 2, 50, canvas.width / 4);
+            }
+            updateInfo();
+        }
+
+        function drawNode(node, x, y, offset) {
+            if (!node) return;
+
+            if (node.left) {
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x - offset, y + 80);
+                ctx.strokeStyle = '#a8b3cf';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                drawNode(node.left, x - offset, y + 80, offset / 2);
+            }
+
+            if (node.right) {
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x + offset, y + 80);
+                ctx.strokeStyle = '#a8b3cf';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                drawNode(node.right, x + offset, y + 80, offset / 2);
+            }
+
+            ctx.beginPath();
+            ctx.arc(x, y, 25, 0, 2 * Math.PI);
+            ctx.fillStyle = '#3498db';
+            ctx.fill();
+            ctx.strokeStyle = '#2980b9';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(node.data, x, y);
+
+            const bf = tree.getBF(node);
+            ctx.fillStyle = '#f5576c';
+            ctx.font = 'bold 12px Arial';
+            ctx.fillText(`BF:${bf}`, x, y - 35);
+        }
+
+        function insertNode() {
+            const input = document.getElementById('nodeValue');
+            const value = parseInt(input.value);
+
+            if (isNaN(value)) {
+                alert('Please enter a valid number');
+                return;
+            }
+
+            tree.root = tree.insert(tree.root, value);
+            addOperation(`Inserted node: ${value}`);
+            input.value = '';
+            drawTree();
+        }
+
+        function clearTree() {
+            tree.root = null;
+            operations.length = 0;
+            addOperation('Tree cleared');
+            drawTree();
+        }
+
+        function updateInfo() {
+            document.getElementById('nodeCount').textContent = tree.countNodes(tree.root);
+            document.getElementById('treeHeight').textContent = tree.getHeight(tree.root);
+        }
+
+        document.getElementById('nodeValue').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                insertNode();
+            }
+        });
+
+        drawTree();
+    </script>
+</body>
+</html>
