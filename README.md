@@ -49,7 +49,7 @@ It provides a **clear step-by-step visualization** for learners to understand ho
 ### 📸 Preview
 
 <p align="center">
-  <img src="https://github.com/surya-vikas/AVLTREE--/preview.png" alt="AVL Tree Visualizer Screenshot" width="700"/>
+<img src="https://raw.githubusercontent.com/surya-vikas/AVLTREE--DSA/main/preview.png" alt="AVL Tree Visualizer Screenshot" width="700"/>
 </p>
 
 
